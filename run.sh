@@ -9,4 +9,4 @@ python pcnn_train.py \
 --nr_logistic_mix 5 \
 --lr_decay 0.999995 \
 --max_epochs 200 \
---en_wandb True \ 
+--en_wandb True \
