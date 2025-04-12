@@ -12,6 +12,7 @@ from tqdm import tqdm
 from pprint import pprint
 import argparse
 from pytorch_fid.fid_score import calculate_fid_given_paths
+from classification_evaluation import classifier
 
 
 def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, mode = 'training'):
@@ -34,6 +35,12 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+        elif mode == 'val':
+            accuracy = classifier(model, data_loader,device)
+            
+    if args.en_wandb and mode == "val":
+        wandb.log({mode + "-Accuracy" : accuracy})
+        wandb.log({mode + "-epoch": epoch})
         
     if args.en_wandb:
         wandb.log({mode + "-Average-BPD" : loss_tracker.get_mean()})

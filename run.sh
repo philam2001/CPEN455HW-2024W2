@@ -6,7 +6,7 @@ python pcnn_train.py \
 --dataset cpen455 \
 --nr_resnet 1 \
 --nr_filters 60 \
---nr_logistic_mix 5 \
+--nr_logistic_mix 10 \
 --lr_decay 0.999995 \
 --max_epochs 200 \
 --en_wandb True \
