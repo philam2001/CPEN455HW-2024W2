@@ -99,6 +99,9 @@ class PixelCNN(nn.Module):
         # add conditional embedding layer
         self.cond_embedding = nn.Embedding(num_classes, nr_filters)
 
+        self.output_film = FiLM(cond_dim=nr_filters, out_channels=nr_filters, hidden_dim=32, gamma_scale=3.0)
+
+
     # fuse in the conditions into the feature maps
     def fuse_conditions(self, feature_list, cond_embedding):
         for i in range(len(feature_list)):
@@ -156,6 +159,10 @@ class PixelCNN(nn.Module):
             if i != 2 :
                 u  = self.upsize_u_stream[i](u)
                 ul = self.upsize_ul_stream[i](ul)
+
+        cond_embed_raw = self.cond_embedding(condition.to(x.device))
+
+        ul = self.output_film(ul, cond_embed_raw)
 
         x_out = self.nin_out(F.elu(ul))
 
