@@ -139,3 +139,27 @@ class gated_resnet(nn.Module):
         a, b = torch.chunk(x, 2, dim=1)
         c3 = a * F.sigmoid(b)
         return og_x + c3
+
+class FiLM(nn.Module):
+    def __init__(self, cond_dim, out_channels, hidden_dim=32, gamma_scale=1.0):
+        super(FiLM, self).__init__()
+        self.gamma_fc = nn.Sequential(
+            nn.Linear(cond_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, out_channels)
+        )
+        self.beta_fc = nn.Sequential(
+            nn.Linear(cond_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, out_channels)
+        )
+        self.gamma_scale = gamma_scale
+
+    def forward(self, features, cond_embedding):
+        # cond_embedding: [B, cond_dim]
+        gamma = self.gamma_fc(cond_embedding) * self.gamma_scale  # shape: [B, out_channels]
+        beta = self.beta_fc(cond_embedding)                       # shape: [B, out_channels]
+        # Reshape to [B, out_channels, 1, 1] for broadcasting
+        gamma = gamma.unsqueeze(-1).unsqueeze(-1)
+        beta = beta.unsqueeze(-1).unsqueeze(-1)
+        return gamma * features + beta
